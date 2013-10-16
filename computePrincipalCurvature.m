@@ -7,7 +7,17 @@
 % the DoG pyramid.
 
 function [PrincipalCurvature] = computePrincipalCurvature(DoGPyramid)
-    PrincipalCurvature = zeros(size(DoGPyramid));
+    [m, n] = size(DoGPyramid);
+    PrincipalCurvature = zeros(size(m,n));
+    
+    
+    for i = 1:m
+        for j = 1:n
+            H = 
+            r = trace(H)^2/det(H);
+            PrincipalCurvature(m,n) = r;
+        end
+    end
     
     
 end
