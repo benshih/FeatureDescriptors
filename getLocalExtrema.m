@@ -7,19 +7,34 @@
 % scale and space
 
 function [locs] = getLocalExtrema(DoGPyramid, DoG_levels, PrincipalCurvature, th_contrast, th_r)
-    locs = zeros(0,3);
+    locslvl = zeros(0,3);
+    I = zeros(0,1);
+    J = zeros(0,1);
+    [m, n] = size(DoGPyramid(:,:,1));
     
     for lev = 2:length(DoG_levels)-1
+        curr = DoGPyramid(:,:,lev);
+        
         % Find the local extrema in space.
-        [xmax, imax, xmin, imin] = extrema2(DoGPyramid(:,:,lev));
-        % Combine the xmax and xmin, imax and imin into own locs vector. 
-        xlocs = cat(1, xmax, xmin); % extrema values. can be ignored because if needed i will obtain it using the index
-        ilocs = cat(1, imax, imin); % extrema linear indices
-        [I, J] = ind2sub(size(DoGPyramid(:,:,lev)), ilocs); % extrema subscript indices
+        for i = 2:m-1
+            for j = 2:n-1
+                neighbors = [curr(i-1, j-1)   curr(i-1, j)  curr(i-1, j+1) ...
+                          curr(i, j-1)     curr(i, j+1) ...
+                          curr(i+1, j-1)   curr(i+1, j)  curr(i+1, j+1)];             
+                if (8 == sum(curr(i,j) > neighbors) || 8 == sum(curr(i,j) < neighbors))
+                   I = [I; i];
+                   J = [J; j];
+                end
+            end
+        end
+        
+        length(I) % check the number of points that are obtained in the first round
+        
+        
+  
         
         % Verify the remaining local extrema in scale.
         up = DoGPyramid(:,:,lev+1);
-        curr = DoGPyramid(:,:,lev);
         down = DoGPyramid(:,:,lev-1);
         scaleExtrema = (curr(sub2ind(size(curr), I, J)) > up(sub2ind(size(curr), I, J)) ...
             & curr(sub2ind(size(curr), I, J)) > down(sub2ind(size(curr), I, J))) ...
@@ -32,9 +47,11 @@ function [locs] = getLocalExtrema(DoGPyramid, DoG_levels, PrincipalCurvature, th
         I = newPts(:, 1);
         J = newPts(:, 2);
 
+        size(I)
         
         % Threshold the remaining local extrema based on contrast.
         currC = DoGPyramid(:,:,lev);
+        temp = currC(sub2ind(size(currC), I, J));
         contrastThresh = abs(currC(sub2ind(size(currC), I, J))) > th_contrast;
         Icut = I.*contrastThresh;
         Jcut = J.*contrastThresh;
@@ -42,6 +59,9 @@ function [locs] = getLocalExtrema(DoGPyramid, DoG_levels, PrincipalCurvature, th
         newPts = newPts(:,sum(newPts)~=0)';
         I = newPts(:, 1);
         J = newPts(:, 2);
+        
+        
+        % Edge Supression
         
         % Threshold the remaining local extrema based on principal
         % curvature ratio.
@@ -54,10 +74,14 @@ function [locs] = getLocalExtrema(DoGPyramid, DoG_levels, PrincipalCurvature, th
         I = newPts(:, 1);
         J = newPts(:, 2);
         
+        
         % The remaining points have passed. These shall be saved and
-        % returned as the key points. 
-        locs = [locs; I J lev*ones(size(I))];
+        % returned as the key points.   
+        locslvl = [locslvl; I J lev*ones(size(I))];
     end
+    
+    [locs, ia, ic] = unique([locslvl(:,1) locslvl(:,2)], 'rows');
+    locs = [locs locslvl(ia, 3)];
     
 end
 

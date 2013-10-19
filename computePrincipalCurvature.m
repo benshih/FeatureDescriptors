@@ -11,7 +11,7 @@ function [PrincipalCurvature] = computePrincipalCurvature(DoGPyramid)
     PrincipalCurvature = zeros(m,n,k);
     
     for l = 1:k
-        [fx, fy] = gradient(DoGPyramid(:,:,k));
+        [fx, fy] = gradient(DoGPyramid(:,:,l));
         [fxx, fxy] = gradient(fx);
         [fyx, fyy] = gradient(fy);
 

@@ -5,3 +5,6 @@
 
 % Generate a static set of test pairs and save that data to a file. 
 
+patchWidth = 9;
+xi = floor(
+yi = floor(randn(
