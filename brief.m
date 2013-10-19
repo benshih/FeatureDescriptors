@@ -20,11 +20,9 @@ function [locs, desc] = brief(im)
     [compareX, compareY] = makeTestPattern(patchWidth, nbits); 
     
     % Get keypoint locations
-    [locs, GaussianPyramid] = DoGdetector(im, sigma0, k, levels, th_contrast, th_r);
-    
+    [locs, ~] = DoGdetector(im, sigma0, k, levels, th_contrast, th_r);
     
     % Compute a set of valid BRIEF descriptors
-    
     [locs, desc] = computeBrief(im, locs, levels, compareX, compareY);
     
 end
